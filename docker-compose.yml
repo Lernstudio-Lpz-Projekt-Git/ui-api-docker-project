@@ -1,1 +1,71 @@
-// Diese Datei beschreibt, wie die Anwendung strukturiert werden soll.
+# Diese Datei beschreibt, wie die Anwendung strukturiert werden soll.
+# D.h. wie auf dr einen Seite ein neues Image (API) erstellt wird und auf
+# der anderen Seite ein Image (nginx*) geladen wird um die UI darin zu starten
+
+# Docker-Compose Version die vewendet wird
+version: "3.9"
+
+# Wuír haben zwei Service: API und UI, beide Service wollen wir starten
+services:
+  # Die Namen unserer Services und grundsätzlich beliebig, frei wählbar
+  # Backend
+  api:
+    # Der Pfad relative von der docker-composer.yml-Datei zum ersten Docker-Verzeichnis
+    # In diesem Verzeichnis befindet sich das Dockerfile zu bauen des Images
+    build: ./api
+    # Definieren der Ports (- Operator für eine Liste)
+    ports:
+    # Portweiterleitung: Host-Port 3_0000 forwarding zum Container-Port: 3_000
+      - 3000:3000
+    # Die Option init fügt einen eigenen Init-Prozess als Hauptprozess (statt Node PID:1) in den Container
+    # ein und kümmert sich um das stoppen aller Prozesse, wenn der Container beendet wird
+    init: true
+    # definiert was passieren soll, wenn ein Container abstürzt
+    restart: always
+    # übernimmt die netzwerkspezifischen Einstellungen
+    networks:
+      - dcnetwork
+
+  # Frontend
+  # Hat in diesem Fall kein eigenes Build, stattdessen geben wir den Namen eines bestehenden Images an
+  ui:
+    image: nginx:1.21.5-alpine    # ${NGINX_VERSION}
+    # Portweiterleitung: Host-Port 4_0000 forwarding zum Container-Port: 80
+    ports:
+      - 4000:80
+    # definiert welches Environment genutz werden soll
+    env_file:
+      - .env
+    # Wir kopieren die Serverdateien (html) vom relativen Pfad unseres Frontends in das nginx Webverzeichnis des Docker-images
+    # ro = read only
+    volumes:
+      - ./ui:/usr/share/nginx/html:ro
+    # Damit sich das Frontend auf das Backend verbinden kann, muss das Images schon vorhanden und gestartet sein.
+    # Um diese Abhängigkeit zu aufzulösen, sagen wir im folgenden, dass das Backend (api) vor dem Frontend (ui) ausgeführt
+    depends_on:
+      - api
+    # übernimmt die netzwerkspezifischen Einstellungen
+    networks:
+      - dcnetwork
+
+# überschreibt das default-Netzwerk und ermöglicht die Definition eines eigenen Netzwerkes
+networks:
+  dcnetwork:
+    driver: bridge
+    # verhindert, dass sich andere Container zu Laufzeit in das Netzwerk einklingen
+    attachable: false
+
+# Nginx (ausgesprochen "engine-x") ist ein Open-Source-Reverse-Proxy-Server für HTTP-, HTTPS-, SMTP-, POP3- 
+# und IMAP-Protokolle sowie ein Load Balancer, HTTP-Cache und ein Webserver (Ursprungsserver). 
+# Das nginx-Projekt begann mit einem starken Fokus auf hohe Gleichzeitigkeit, hohe Leistung und geringe Speichernutzung.
+
+# das Building wird aus dem Root-Verzeichnis mit: 
+# docker-compose up -d          ---> gestartet und mit 
+# docker-compose kill / stop    ---> beendet die Container, liegt aber noch im Speicher.
+# docker-compose down           ---> beendet UND entfernt die Container und das Netzwerk aus dem Speicher.
+# docker-compose down --volumes ---> entfernt zusätzlich noch die Volumes
+# docker-compose config         ---> zeigt den gerenderten Bash-Code
+# docker-compose --env-file .env  ---> definiert welches Environment genutz werden soll
+# docker ps                     ---> listet alles Container auf
+# docker-compose ps             ---> hat eine etwas vereinfachte Ausgabe
+# docker network ls             ---> listet die Netzwerkverbindungen und Bridges auf

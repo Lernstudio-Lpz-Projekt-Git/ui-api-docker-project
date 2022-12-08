@@ -7,7 +7,7 @@ const http = require("http");
 
 // Instanz des Loggers
 const logger = flaschenpost.getLogger();
-// Intsanz einer Express API
+// Instanz einer Express API
 const api = express();
 // cors aktivieren damit der Cross-Domain-Zugiff funktioniert
 api.use(cors());

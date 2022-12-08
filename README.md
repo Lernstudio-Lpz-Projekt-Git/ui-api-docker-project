@@ -7,7 +7,7 @@ Mac: https://docs.docker.com/desktop/install/mac-install/ <br>
 Win: https://docs.docker.com/desktop/install/windows-install/ <br>
 Linux: https://docs.docker.com/desktop/install/linux-install/ <br>
 
-## Installtion prüfen
+## Installation prüfen
 Mit folgenden Befehlen können Sie die aktuell installierte Dockerversion prüfen:<br>
 ```docker -v``` <br>
 Ausgabe: Docker version 20.10.21, build baeda1f<br>
@@ -16,6 +16,18 @@ Ausgabe: Docker Compose version v2.12.2<br>
 ```docker compose``` oder <br>
 ```docker-compose```<br>
 Ausgabe: Usage:  docker compose [OPTIONS] COMMAND .... und die Übersicht der CLI-Befehle.<br>
+
+## API starten
+```docker run -d --init -p 3000:3000 --name api api```<br>
+```-d``` ---> Das Flag -d weist docker an, einen Container im Hintergrund im Detached-Modus auszuführen und die neue Container-ID  auszugeben.<br>
+```--init``` ---> Der Hauptprozess des Containers ist für die Verwaltung aller Prozesse zuständig, die er startet. In einigen Fällen ist der Hauptprozess nicht gut konzipiert und kann die Kindprozesse beim Beenden des Containers nicht ordnungsgemäß stoppen. Wenn Ihr Prozess in diese Kategorie fällt, können Sie die Option --init verwenden, wenn Sie den Container starten. Die Option --init fügt einen winzigen Init-Prozess als Hauptprozess in den Container ein und kümmert sich um das stoppen aller Prozesse, wenn der Container beendet wird.<br>
+```-p``` ---> Portweiterleitung: Host-Port forwarding zum Container-Port<br>
+```--name``` ---> Sie können Ihren Docker-Containern mit dem Flag --name einen Namen zuweisen.<br>
+
+## UI starten
+In das Root-Verzeichnis wechseln: ```cd .. ```<br>
+```docker run -d -p 4000:80 -v $(pwd)/ui:/usr/share/nginx/html:ro --name ui nginx:1.21.5-alpine```<br>
+Seite testen: ```url http://localhost:4000```
 
 # Warum Docker nutzen? Was bringt das?
 Docker ist ein beliebtes Open-Source-Tool, das eine portable und konsistente Laufzeitumgebung für Softwareanwendungen bietet. Docker verwendet Container als isolierte Umgebungen im Benutzerraum, die auf Betriebssystemebene ausgeführt werden und das Dateisystem sowie die Systemressourcen gemeinsam nutzen. <br>
